@@ -1,1 +1,1 @@
-export type { IVoice, ISubscription} from './page.definition';
+export type { IVoice, ISubscription } from './page.definition';

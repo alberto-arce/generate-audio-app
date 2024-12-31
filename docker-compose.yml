@@ -1,13 +1,11 @@
 services:
-
   web:
     build:
       context: .
     ports:
-      - "3000:3000"
+      - '3000:3000'
     networks:
-      - web-app 
-
+      - web-app
 
 networks:
   web-app:

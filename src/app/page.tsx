@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState, useEffect, ChangeEvent } from "react";
+import { useState, useEffect, ChangeEvent } from 'react';
 import {
   Box,
   Select,
@@ -10,7 +10,7 @@ import {
   Divider,
   CircularProgress,
   Typography,
-} from "@mui/material";
+} from '@mui/material';
 import {
   Title,
   FormContainer,
@@ -19,30 +19,30 @@ import {
   FormControlStyled,
   SubTitle,
   StyledTextField,
-} from "./page.styles";
-import { IVoice, ISubscription } from "./definitions";
+} from './page.styles';
+import { IVoice, ISubscription } from './definitions';
 
 export default function Home() {
-  const [text, setText] = useState<string>("");
+  const [text, setText] = useState<string>('');
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [selectedVoice, setSelectedVoice] = useState<string>("");
+  const [selectedVoice, setSelectedVoice] = useState<string>('');
   const [voices, setVoices] = useState<IVoice[]>([]);
   const [subscription, setSubscription] = useState<ISubscription | null>(null);
 
   useEffect(() => {
     const fetchVoices = async () => {
       try {
-        const response = await fetch("/api/voices");
+        const response = await fetch('/api/voices');
         if (!response.ok) {
-          throw new Error("Failed to fetch voices.");
+          throw new Error('Failed to fetch voices.');
         }
         const data = await response.json();
         setVoices(data.voices);
-        setSelectedVoice(data.voices[0]?.voice_id || "");
+        setSelectedVoice(data.voices[0]?.voice_id || '');
       } catch (error) {
-        console.error("Error fetching voices:", error);
-        alert("There was an error fetching the voices.");
+        console.error('Error fetching voices:', error);
+        alert('There was an error fetching the voices.');
       }
     };
     fetchVoices();
@@ -51,15 +51,15 @@ export default function Home() {
   useEffect(() => {
     const fetchSubscription = async () => {
       try {
-        const response = await fetch("/api/subscription");
+        const response = await fetch('/api/subscription');
         if (!response.ok) {
-          throw new Error("Failed to fetch subscription data.");
+          throw new Error('Failed to fetch subscription data.');
         }
         const data = await response.json();
         setSubscription(data.subscription);
       } catch (error) {
-        console.error("Error fetching subscription data:", error);
-        alert("There was an error fetching the subscription data.");
+        console.error('Error fetching subscription data:', error);
+        alert('There was an error fetching the subscription data.');
       }
     };
     fetchSubscription();
@@ -79,19 +79,19 @@ export default function Home() {
 
     const charCount = text.length;
     if (charCount > subscription.character_limit) {
-      alert("Character count exceeds the limit.");
+      alert('Character count exceeds the limit.');
       return;
     }
     if (!selectedVoice) {
-      alert("Please select a voice.");
+      alert('Please select a voice.');
       return;
     }
     setIsLoading(true);
     try {
-      const response = await fetch("/api/generate-audio", {
-        method: "POST",
+      const response = await fetch('/api/generate-audio', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           text: text,
@@ -100,7 +100,7 @@ export default function Home() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to generate audio.");
+        throw new Error('Failed to generate audio.');
       }
 
       const data = await response.json();
@@ -108,8 +108,8 @@ export default function Home() {
       const audioUrlWithTimestamp = `${data.audioUrl}?timestamp=${Date.now()}`;
       setAudioUrl(audioUrlWithTimestamp);
     } catch (error) {
-      console.error("Error generating audio:", error);
-      alert("There was an error generating the audio.");
+      console.error('Error generating audio:', error);
+      alert('There was an error generating the audio.');
     } finally {
       setIsLoading(false);
     }
@@ -119,11 +119,11 @@ export default function Home() {
     return (
       <Box
         sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "90vh",
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '90vh',
         }}
       >
         <CircularProgress />
@@ -143,7 +143,7 @@ export default function Home() {
       <Title variant="h4" gutterBottom>
         Text to Audio Generator
       </Title>
-      <Divider sx={{ marginBottom: "20px" }} />
+      <Divider sx={{ marginBottom: '20px' }} />
       <FormControlStyled fullWidth>
         <InputLabel id="voice-select-label">Select Voice</InputLabel>
         <Select
@@ -178,18 +178,18 @@ export default function Home() {
         disabled={isGenerateButtonDisabled}
         fullWidth
       >
-        {isLoading ? "Generating..." : "Generate Audio"}
+        {isLoading ? 'Generating...' : 'Generate Audio'}
       </StyledButton>
 
       {isLoading && <ProgressBar />}
 
       {audioUrl && (
-        <Box sx={{ marginTop: "20px" }}>
+        <Box sx={{ marginTop: '20px' }}>
           <audio key={audioUrl} controls>
             <source src={audioUrl} type="audio/mp3" />
             Your browser does not support the audio element.
           </audio>
-          <Box sx={{ marginTop: "10px" }}>
+          <Box sx={{ marginTop: '10px' }}>
             <a href={audioUrl} download="audio.mp3">
               <StyledButton variant="outlined" color="secondary" fullWidth>
                 Download Audio
