@@ -12,8 +12,6 @@ This is a simple single-page application built with Next.js that utilizes the El
 - **Audio Generation**: Generate audio from the provided text.
 - **Playback and Download**: Play the generated audio or download it as an MP3 file.
 
-**Playback and Download**: Play the generated audio or download it as an MP3 file.
-
 ## Environment Variables
 
 To use the ElevenLabs API, you need to set up the following environment variables in your `.env` file:
