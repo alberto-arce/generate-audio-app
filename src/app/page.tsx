@@ -10,6 +10,8 @@ import {
   Divider,
   CircularProgress,
   Typography,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import {
   Title,
@@ -19,6 +21,10 @@ import {
   FormControlStyled,
   SubTitle,
   StyledTextField,
+  ButtonRow,
+  AudioSection,
+  AudioTitle,
+  AudioButton
 } from './page.styles';
 import { IVoice, ISubscription } from './definitions';
 
@@ -29,6 +35,8 @@ export default function Home() {
   const [selectedVoice, setSelectedVoice] = useState<string>('');
   const [voices, setVoices] = useState<IVoice[]>([]);
   const [subscription, setSubscription] = useState<ISubscription | null>(null);
+  const [showDownloadSnackbar, setShowDownloadSnackbar] = useState(false);
+  const [showGeneratedSnackbar, setShowGeneratedSnackbar] = useState(false);
 
   useEffect(() => {
     const fetchVoices = async () => {
@@ -48,20 +56,21 @@ export default function Home() {
     fetchVoices();
   }, []);
 
-  useEffect(() => {
-    const fetchSubscription = async () => {
-      try {
-        const response = await fetch('/api/subscription');
-        if (!response.ok) {
-          throw new Error('Failed to fetch subscription data.');
-        }
-        const data = await response.json();
-        setSubscription(data.subscription);
-      } catch (error) {
-        console.error('Error fetching subscription data:', error);
-        alert('There was an error fetching the subscription data.');
+  const fetchSubscription = async () => {
+    try {
+      const response = await fetch('/api/subscription');
+      if (!response.ok) {
+        throw new Error('Failed to fetch subscription data.');
       }
-    };
+      const data = await response.json();
+      setSubscription(data.subscription);
+    } catch (error) {
+      console.error('Error fetching subscription data:', error);
+      alert('There was an error fetching the subscription data.');
+    }
+  };
+
+  useEffect(() => {
     fetchSubscription();
   }, []);
 
@@ -107,6 +116,12 @@ export default function Home() {
       // Add a timestamp to the URL to force the file to reload
       const audioUrlWithTimestamp = `${data.audioUrl}?timestamp=${Date.now()}`;
       setAudioUrl(audioUrlWithTimestamp);
+
+      // Fetch updated subscription data to refresh character count
+      await fetchSubscription();
+
+      // Show success notification
+      setShowGeneratedSnackbar(true);
     } catch (error) {
       console.error('Error generating audio:', error);
       alert('There was an error generating the audio.');
@@ -168,36 +183,80 @@ export default function Home() {
         variant="outlined"
         fullWidth
       />
+      <ButtonRow>
+        <StyledButton
+          variant="contained"
+          color="primary"
+          onClick={generateAudio}
+          disabled={isGenerateButtonDisabled}
+          fullWidth
+        >
+          {isLoading ? 'Generating...' : 'Generate audio'}
+        </StyledButton>
+        <StyledButton
+          variant="outlined"
+          color="secondary"
+          onClick={() => setText('')}
+          fullWidth
+        >
+          Clear text
+        </StyledButton>
+
+      </ButtonRow>
       <SubTitle variant="body2" color="textSecondary">
         Characters used: {text.length} / {availableChars} available
       </SubTitle>
-      <StyledButton
-        variant="contained"
-        color="primary"
-        onClick={generateAudio}
-        disabled={isGenerateButtonDisabled}
-        fullWidth
-      >
-        {isLoading ? 'Generating...' : 'Generate Audio'}
-      </StyledButton>
-
       {isLoading && <ProgressBar />}
-
       {audioUrl && (
-        <Box sx={{ marginTop: '20px' }}>
-          <audio key={audioUrl} controls>
+        <AudioSection>
+          <AudioTitle>Audio preview</AudioTitle>
+          <audio key={audioUrl} controls style={{ width: '100%' }}>
             <source src={audioUrl} type="audio/mp3" />
             Your browser does not support the audio element.
           </audio>
-          <Box sx={{ marginTop: '10px' }}>
-            <a href={audioUrl} download="audio.mp3">
-              <StyledButton variant="outlined" color="secondary" fullWidth>
-                Download Audio
+          <ButtonRow style={{ marginTop: '15px' }}>
+            <AudioButton
+              href={audioUrl}
+              download="audio.mp3"
+              onClick={() => setShowDownloadSnackbar(true)}
+            >
+              <StyledButton variant="contained" color="success" fullWidth>
+                Download audio
               </StyledButton>
-            </a>
-          </Box>
-        </Box>
+            </AudioButton>
+            <Box sx={{ flex: 1, display: 'flex' }}>
+              <StyledButton
+                variant="outlined"
+                color="error"
+                onClick={() => setAudioUrl(null)}
+                fullWidth
+              >
+                Clear audio
+              </StyledButton>
+            </Box>
+          </ButtonRow>
+        </AudioSection>
       )}
+      <Snackbar
+        open={showDownloadSnackbar}
+        autoHideDuration={4000}
+        onClose={() => setShowDownloadSnackbar(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert onClose={() => setShowDownloadSnackbar(false)} severity="success" sx={{ width: '100%' }}>
+          Audio download started!
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        open={showGeneratedSnackbar}
+        autoHideDuration={4000}
+        onClose={() => setShowGeneratedSnackbar(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert onClose={() => setShowGeneratedSnackbar(false)} severity="success" sx={{ width: '100%' }}>
+          Audio generated successfully!
+        </Alert>
+      </Snackbar>
     </FormContainer>
   );
 }
